@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Members</title>
+        <link rel="stylesheet" href="accordion.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    </head>
+    <body class="container">
+        <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand"><i class="fa fa-user"></i>&nbsp Team Members</a>
+            <form class="form-inline">
+                <div class="input-group">
+                    <input type="text" id="filterInput" class="form-control form-control-sm" placeholder="Find by name" aria-label="Find by name" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary btn-sm" onclick="js:filterName();" type="button"><i class="fa fa-search"></i></button>
+                    </div>
+                </div>
+            </form>
+            <div class="col-md-12 col-sm-12 col-xs-12" id="people" style="padding-left: 35px;">
+            </div>   
+        </nav>
+        <div class="mt-3">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            </div>                                                                
+        </div>
+    </body>
+    <script>
+        var membersDiv = [];
+        var filteredMembers = [];
+        $(window).on('load', function(){
+            $.get("http://jsonplaceholder.typicode.com/users", function(data, status){
+                filteredMembers = data;
+                filterAndAppendMembers();
+            });    
+        });
+        function filterName()
+        {
+            filteredMembers = filteredMembers.filter(function (member) {
+                return member.name.includes($("#filterInput").val());
+            });
+            membersDiv = [];
+            filterAndAppendMembers();
+        }
+
+        function filterAndAppendMembers()
+        {
+            filteredMembers.forEach(function(value,index)
+            {
+                membersDiv[value.id]="<div class='panel panel-default'><div class='panel-heading' role='tab' id='heading"+value.id+"'><h4 class='panel-title'><a role='button' data-toggle='collapse' data-parent='#accordion' href='#collapse"+value.id+"' aria-expanded='true' aria-controls='collapse"+value.id+"'><i class='more-less fa fa-angle-right'></i>"+value.name+"<span style='float:right; padding-right:10px;'>Member</span></a><span style='font-size:12px; padding-left:25px;'>"+value.email+"</span></h4></div><div id='collapse"+value.id+"' class='panel-collapse collapse' role='tabpanel' aria-labelledby='heading"+value.id+"'><div class='panel-body' style='font-size:12px; text-align:right; padding-right: 35px;'><div><b>Address: </b>"+value.address.street+", "+value.address.suite+", "+value.address.city+", "+value.address.zipcode+"</div><div><b>Lang: </b>"+value.address.geo.lng+" <b>Lat: </b>"+value.address.geo.lat+"</div></div></div>";
+            });
+            $('#accordion').html('');
+            membersDiv.forEach(function(value,index){
+                $('#accordion').append(value);
+            });
+            $('#people').text(filteredMembers.length+" People");
+        }
+
+        function toggleIcon(e) 
+        {
+            $(e.target)
+            .prev('.panel-heading')
+            .find(".more-less")
+            .toggleClass('fa-angle-right fa-angle-down');
+        }
+        $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+        $('.panel-group').on('shown.bs.collapse', toggleIcon);
+    </script>
+</html>
